@@ -3,7 +3,7 @@ const { chromium } = require("playwright");
 const app = express();
 const PORT = process.env.PORT || 3000;
 const API_KEY = process.env.API_KEY || "";
-const BLUE_URL = "https://blue.cl/seguimiento";
+const BLUE_URL = "https://www.blue.cl/enviar/seguimiento";
 let browser=null, context=null, page=null, startingBrowser=null;
 
 function normalizeStatus(raw,eventCode){
