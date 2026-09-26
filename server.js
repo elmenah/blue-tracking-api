@@ -21,16 +21,56 @@ function normalizeStatus(raw,eventCode){
 async function startBrowser(){
   if(page && !page.isClosed()) return page;
   if(startingBrowser) return startingBrowser;
+
   startingBrowser=(async()=>{
-    if(browser){try{await browser.close()}catch{}}
-    browser=await chromium.launch({headless:true,args:["--no-sandbox","--disable-setuid-sandbox","--disable-dev-shm-usage"]});
-    context=await browser.newContext({locale:"es-CL"});
+    if(browser){
+      try{await browser.close()}catch{}
+    }
+
+    browser=await chromium.launch({
+      headless:true,
+      args:[
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--disable-dev-shm-usage"
+      ]
+    });
+
+    context=await browser.newContext({
+      locale:"es-CL"
+    });
+
     page=await context.newPage();
-    await page.goto(BLUE_URL,{waitUntil:"domcontentloaded",timeout:60000});
-    await page.waitForTimeout(5000);
+
+    console.log("[BLUE] Abriendo Blue Express...");
+
+    await page.goto(BLUE_URL,{
+      waitUntil:"domcontentloaded",
+      timeout:60000
+    });
+
+    console.log("[BLUE] URL cargada:", page.url());
+
+    // Esperar a que realmente cargue la aplicación de seguimiento.
+    // Esto reemplaza la espera fija de 5 segundos.
+    await page.waitForSelector(
+      "input[placeholder*='OS']",
+      {
+        state:"visible",
+        timeout:40000
+      }
+    );
+
+    console.log("[BLUE] Página de seguimiento lista:", page.url());
+
     return page;
   })();
-  try{return await startingBrowser}finally{startingBrowser=null}
+
+  try{
+    return await startingBrowser;
+  }finally{
+    startingBrowser=null;
+  }
 }
 
 async function trackBlue(os){
